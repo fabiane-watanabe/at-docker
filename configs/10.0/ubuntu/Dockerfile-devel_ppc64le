@@ -12,25 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ppc64le/ubuntu:14.04
+ARG UBUNTU_RELEASE=xenial
+
+FROM ppc64le/ubuntu:${UBUNTU_RELEASE}
+
+ARG UBUNTU_RELEASE=xenial
 
 WORKDIR /root
 
-ARG DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN [ -n "$HTTP_PROXY" ] && echo Acquire::http::proxy '"'$HTTP_PROXY'";' >> /etc/apt/apt.conf.d/http_proxy || :
+RUN [ -n "$HTTPS_PROXY" ] && echo Acquire::https::proxy '"'$HTTPS_PROXY'";' >> /etc/apt/apt.conf.d/https_proxy || :
+RUN [ -n "$FTP_PROXY" ] && echo Acquire::ftp::proxy '"'$FTP_PROXY'";' >> /etc/apt/apt.conf.d/ftp_proxy || :
 
 # Configure apt to nicely install packages
 RUN apt-get update \
     && apt-get install -y apt-utils \
-    && apt-get install -y autoconf automake bison byacc ccache cscope ctags curl flex \
+        autoconf automake bison byacc ccache cscope ctags curl flex \
         elfutils libtool libstdc++-4.8-dev m4 make man-db \
     && apt-get clean
 
-ENV AT_VERSION 10.0
+ARG AT_VERSION=10.0
 
-RUN curl -O ftp://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu/dists/trusty/6976a827.gpg.key \
-    && apt-key add 6976a827.gpg.key \
-    && rm -f 6976a827.gpg.key \
-    && echo "deb ftp://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu trusty at${AT_VERSION}" >> /etc/apt/sources.list \
+ENV http_proxy $HTTP_PROXY
+
+RUN curl http://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu/dists/trusty/6976a827.gpg.key | apt-key add - \
+    && echo "deb http://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu ${UBUNTU_RELEASE} at${AT_VERSION}" >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y advance-toolchain-at${AT_VERSION}-runtime advance-toolchain-at${AT_VERSION}-devel \
         advance-toolchain-at${AT_VERSION}-perf advance-toolchain-at${AT_VERSION}-mcore-libs
