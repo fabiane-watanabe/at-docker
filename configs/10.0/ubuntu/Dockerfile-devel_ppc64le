@@ -37,8 +37,8 @@ ARG AT_VERSION=10.0
 
 ENV http_proxy $HTTP_PROXY
 
-RUN curl http://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu/dists/trusty/6976a827.gpg.key | apt-key add - \
-    && echo "deb http://ftp.unicamp.br/pub/linuxpatch/toolchain/at/ubuntu ${UBUNTU_RELEASE} at${AT_VERSION}" >> /etc/apt/sources.list \
+RUN curl http://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at/ubuntu/dists/trusty/6976a827.gpg.key | apt-key add - \
+    && echo "deb http://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at/ubuntu ${UBUNTU_RELEASE} at${AT_VERSION}" >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get install -y advance-toolchain-at${AT_VERSION}-runtime advance-toolchain-at${AT_VERSION}-devel \
         advance-toolchain-at${AT_VERSION}-perf advance-toolchain-at${AT_VERSION}-mcore-libs
