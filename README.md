@@ -29,8 +29,14 @@ By default **make** builds an image with following configuration:
 
 Some build parameters are available though, use following environment variables to set them:
 
- - **AT\_CONFIGSET**=*version*, where *version* is the AT version (9.0, 10.0, and so on)
+ - **AT\_VERSION**=*version*, where *version* is the AT version (10.0, 11.0 and so on)
+ - **AT\_MINOR**=*minor* where *minor* is the update number (this will be used if AT\_EXTRA is set)
+ - **AT\_EXTRA**=*extra*, where *extra* is a value to add to the AT version (alpha1, beta2, rc1...)
+ - **DISTRO\_NAME**=*distro*, where *distro* is the name of the distro (debian, ubuntu...)
+ - **DISTRO\_NICK**=*nick*, where *nick* is the nickname/version of the distro (buster, focal, xenial...)
  - **IMAGE\_PROFILE**=*profile*, where *profile* indicates a profile which may be either *runtime* or *devel*
+ - **REPO**=*repo*, where *repo* is a remote repository to get the AT packages (by default https://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at)
+ - **DOCKER\_TOOL**=*tool*, where *tool* is the container tool to use
 
 The Makefile get the name of your host's OS to select a suitable image OS. Thus, you must use a Linux distribution to build the image on which we provide a Dockerfile for the same OS. You can check supported distribution in the directory configs/*version*/ for the given Advance Toolchain *version*.
 
