@@ -26,7 +26,7 @@
 #                     default: current nickname/version
 #     IMAGE_PROFILE - devel (default) or runtime
 #     REPO          - specify the remote repository to get the AT packages
-#                     default: http://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at
+#                     default: https://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at
 #     DOCKER_TOOL   - specify the container tool to use
 #                     default: docker or podman
 
@@ -87,7 +87,7 @@ DOCKER_FILE := $(CONFIG)/dockerfile-$(IMAGE_PROFILE)
 IMAGE_TAG := at/$(AT_VERSION):$(DISTRO_NAME)_$(IMAGE_PROFILE)_$(HOST_ARCH)
 
 ifndef REPO
-    REPO := http://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at
+    REPO := https://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at
 endif
 
 ifdef AT_EXTRA
