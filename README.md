@@ -36,7 +36,7 @@ Some build parameters are available though, use following environment variables 
  - **DISTRO\_NICK**=*nick*, where *nick* is the nickname/version of the distro (buster, focal, xenial...)
  - **IMAGE\_PROFILE**=*profile*, where *profile* indicates a profile which may be either *runtime* or *devel*
  - **REPO**=*repo*, where *repo* is a remote repository to get the AT packages (by default https://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at)
- - **DOCKER\_TOOL**=*tool*, where *tool* is the container tool to use
+ - **CONTAINER\_TOOL**=*tool*, where *tool* is the container tool to use (by default it searches for docker or podman)
 
 The Makefile get the name of your host's OS to select a suitable image OS. Thus, you must use a Linux distribution to build the image on which we provide a Dockerfile for the same OS. You can check supported distribution in the directory configs/*version*/ for the given Advance Toolchain *version*.
 

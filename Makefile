@@ -14,31 +14,31 @@
 
 
 # Options:
-#     AT_VERSION    - specify the AT version
-#                     default: latest version
-#     AT_MINOR      - specify a minor version (this will be used if AT_EXTRA is set)
-#                     default: nothing
-#     AT_EXTRA      - specify an extra value to add to the AT version (alpha1, beta2, rc1...)
-#                     default: nothing
-#     DISTRO_NAME   - specify the name of the distro (debian, ubuntu...)
-#                     default: current distro
-#     DISTRO_NICK   - specify the nickname/version of the distro (buster, focal, xenial...)
-#                     default: current nickname/version
-#     IMAGE_PROFILE - devel (default) or runtime
-#     REPO          - specify the remote repository to get the AT packages
-#                     default: https://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at
-#     DOCKER_TOOL   - specify the container tool to use
-#                     default: docker or podman
+#     AT_VERSION     - specify the AT version
+#                      default: latest version
+#     AT_MINOR       - specify a minor version (this will be used if AT_EXTRA is set)
+#                      default: nothing
+#     AT_EXTRA       - specify an extra value to add to the AT version (alpha1, beta2, rc1...)
+#                      default: nothing
+#     DISTRO_NAME    - specify the name of the distro (debian, ubuntu...)
+#                      default: current distro
+#     DISTRO_NICK    - specify the nickname/version of the distro (buster, focal, xenial...)
+#                      default: current nickname/version
+#     IMAGE_PROFILE  - devel (default) or runtime
+#     REPO           - specify the remote repository to get the AT packages
+#                      default: https://public.dhe.ibm.com/software/server/POWER/Linux/toolchain/at
+#     CONTAINER_TOOL - specify the container tool to use
+#                      default: docker or podman
 
 SHELL := /bin/bash
 
-ifndef DOCKER_TOOL
+ifndef CONTAINER_TOOL
     # Is there docker?
-    DOCKER_TOOL := $(shell command -v docker)
-    ifeq ($(DOCKER_TOOL),)
+    CONTAINER_TOOL := $(shell command -v docker)
+    ifeq ($(CONTAINER_TOOL),)
         # No docker, let try podman
-        DOCKER_TOOL := $(shell command -v podman)
-        ifeq ($(DOCKER_TOOL),)
+        CONTAINER_TOOL := $(shell command -v podman)
+        ifeq ($(CONTAINER_TOOL),)
             $(error Unable to find docker or podman command at PATH)
         endif
     endif
@@ -102,7 +102,7 @@ endif
 
 all: $(DOCKER_FILE)
 	@echo Build docker image with $(IMAGE_TAG) tag
-	$(DOCKER_TOOL) build --build-arg ARCH=$(HOST_ARCH) \
+	$(CONTAINER_TOOL) build --build-arg ARCH=$(HOST_ARCH) \
                              --build-arg AT_VERSION=$(AT_VERSION) \
                              --build-arg DISTRO_NAME=$(DISTRO_NAME) \
                              --build-arg DISTRO_NICK=$(DISTRO_NICK) \
@@ -112,4 +112,4 @@ all: $(DOCKER_FILE)
                              -t $(IMAGE_TAG) -f $(DOCKER_FILE) $(CONFIG)
 clean:
 	@echo Remove docker image tagged $(IMAGE_TAG)
-	$(DOCKER_TOOL) rmi $(IMAGE_TAG)
+	$(CONTAINER_TOOL) rmi $(IMAGE_TAG)

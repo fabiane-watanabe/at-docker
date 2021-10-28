@@ -47,6 +47,9 @@ RUN curl -s ${REPO}/${DISTRO_NAME}/dists/${DISTRO_NICK}/6976a827.gpg.key | apt-k
         advance-toolchain-at${AT_VERSION}${EXTRA}-devel \
         advance-toolchain-at${AT_VERSION}${EXTRA}-perf
 
+RUN ln -sf /opt/at${AT_VERSION}${MINOR}${EXTRA}/lib64/ld64.so.2 /lib64/ld64.so.2
+RUN ln -sf /opt/at${AT_VERSION}${MINOR}${EXTRA}/sbin/ldconfig /sbin/ldconfig
+
 ENV PATH /opt/at${AT_VERSION}${MINOR}${EXTRA}/bin:$PATH
 
 CMD ["/bin/bash"]
