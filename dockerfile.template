@@ -32,18 +32,16 @@ RUN [ -n "$HTTP_PROXY" ] && echo Acquire::http::proxy '"'$HTTP_PROXY'";' >> /etc
 RUN [ -n "$HTTPS_PROXY" ] && echo Acquire::https::proxy '"'$HTTPS_PROXY'";' >> /etc/apt/apt.conf.d/https_proxy || :
 RUN [ -n "$FTP_PROXY" ] && echo Acquire::ftp::proxy '"'$FTP_PROXY'";' >> /etc/apt/apt.conf.d/ftp_proxy || :
 
-RUN apt update \
-    && apt install -y apt-utils curl gnupg2 \
-    && apt clean
+RUN apt-get update \
+    && apt-get install -y __BASE_PACKAGES__ \
+    && apt-get clean
 
 ENV http_proxy $HTTP_PROXY
 
 RUN curl -s ${REPO}/${DISTRO_NAME}/dists/${DISTRO_NICK}/6976a827.gpg.key | apt-key add - \
     && echo "deb ${REPO}/${DISTRO_NAME} ${DISTRO_NICK} at${AT_VERSION}" >> /etc/apt/sources.list \
-    && apt update \
-    && apt install -y advance-toolchain-at${AT_VERSION}${EXTRA}-runtime \
-        advance-toolchain-at${AT_VERSION}${EXTRA}-libnxz \
-        advance-toolchain-at${AT_VERSION}${EXTRA}-mcore-libs
+    && apt-get update \
+    && apt-get install -y __AT_PACKAGES__
 
 RUN ln -sf /opt/at${AT_VERSION}${MINOR}${EXTRA}/lib64/ld64.so.2 /lib64/ld64.so.2
 RUN ln -sf /opt/at${AT_VERSION}${MINOR}${EXTRA}/sbin/ldconfig /sbin/ldconfig

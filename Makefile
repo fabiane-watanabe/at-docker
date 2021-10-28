@@ -53,7 +53,7 @@ endif
 CONFIG_ROOT := $(shell pwd)/configs
 
 ifndef AT_VERSION
-    AT_VERSION := $(shell basename $$(ls -d $(CONFIG_ROOT)/[1-9]*.[0-9] | tail -1))
+    AT_VERSION := $(shell basename -s .conf $$(ls $(CONFIG_ROOT)/[1-9]*.conf | sort -h | tail -1))
     ifeq ($(AT_VERSION),)
         $(error Couldn't infer AT_VERSION variable, and no hint was given... Bailing out!)
     else
@@ -61,7 +61,7 @@ ifndef AT_VERSION
     endif
 endif
 
-CONFIG := $(CONFIG_ROOT)/$(AT_VERSION)
+CONFIG := $(CONFIG_ROOT)/$(AT_VERSION).conf
 HOST_ARCH := $(shell uname -m)
 ifndef DISTRO_NAME
     DISTRO_NAME := $(shell $(LSB_TOOL) -i -s | tr [:upper:] [:lower:])
@@ -82,8 +82,6 @@ ifndef IMAGE_PROFILE
     IMAGE_PROFILE := devel
 endif
 
-DOCKER_FILE := $(CONFIG)/dockerfile-$(IMAGE_PROFILE)
-
 IMAGE_TAG := at/$(AT_VERSION):$(DISTRO_NAME)_$(IMAGE_PROFILE)_$(HOST_ARCH)
 
 ifndef REPO
@@ -98,10 +96,18 @@ ifdef AT_EXTRA
     MINOR := "-$(AT_MINOR)"
 endif
 
+DOCKER_FILE := $(shell mktemp)
+
 .PHONY: all clean
 
-all: $(DOCKER_FILE)
+all:
 	@echo Build docker image with $(IMAGE_TAG) tag
+	@cp dockerfile.template $(DOCKER_FILE)
+	@source $(CONFIG) ; \
+	sed -i "s@__BASE_PACKAGES__@$${BASE_PACKAGES}@g" $(DOCKER_FILE) ; \
+	AT_PACKAGES="$${AT_RUNTIME_PACKAGES}" ; \
+	[[ "$(IMAGE_PROFILE)" == "devel" ]] && AT_PACKAGES="$${AT_PACKAGES} $${AT_DEVEL_PACKAGES}" ; \
+	sed -i "s@__AT_PACKAGES__@$$(echo " $${AT_PACKAGES}" | sed "s/  */ advance-toolchain-at\$${AT_VERSION}\$${EXTRA}-/g")@g" $(DOCKER_FILE)
 	$(CONTAINER_TOOL) build --build-arg ARCH=$(HOST_ARCH) \
                              --build-arg AT_VERSION=$(AT_VERSION) \
                              --build-arg DISTRO_NAME=$(DISTRO_NAME) \
@@ -109,7 +115,9 @@ all: $(DOCKER_FILE)
                              --build-arg EXTRA=$(EXTRA) \
                              --build-arg MINOR=$(MINOR) \
                              --build-arg REPO=$(REPO) \
-                             -t $(IMAGE_TAG) -f $(DOCKER_FILE) $(CONFIG)
+                             -t $(IMAGE_TAG) -f $(DOCKER_FILE) $(CONFIG_ROOT)
+	@rm $(DOCKER_FILE)
+
 clean:
 	@echo Remove docker image tagged $(IMAGE_TAG)
 	$(CONTAINER_TOOL) rmi $(IMAGE_TAG)
