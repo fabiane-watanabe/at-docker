@@ -29,7 +29,7 @@ By default **make** builds an image with following configuration:
 
 Some build parameters are available though, use following environment variables to set them:
 
- - **AT\_VERSION**=*version*, where *version* is the AT version (10.0, 11.0 and so on)
+ - **AT\_VERSION**=*version*, where *version* is the AT version (13.0, 14.0 and so on)
  - **AT\_MINOR**=*minor* where *minor* is the update number (this will be used if AT\_EXTRA is set)
  - **AT\_EXTRA**=*extra*, where *extra* is a value to add to the AT version (alpha1, beta2, rc1...)
  - **DISTRO\_NAME**=*distro*, where *distro* is the name of the distro (debian, ubuntu...)
@@ -41,8 +41,8 @@ Some build parameters are available though, use following environment variables 
 The Makefile get the name of your host's OS to select a suitable image OS. Thus, you must use a Linux distribution to build the image on which we provide a Dockerfile for the same OS. You can check supported distribution in the directory configs/*version*/ for the given Advance Toolchain *version*.
 
 # Run
-You can use **docker run** to create a container from AT images. For example, following command starts a container from AT 10.0 devel image and attach to a shell session:
+You can use **docker run** to create a container from AT images. For example, following command starts a container from AT 13.0 devel image and attach to a shell session:
 ```
-docker run -it --privileged at/10.0:ubuntu_devel_ppc64le 
+docker run -it --privileged at/13.0:ubuntu_devel_ppc64le
 ```
 **Important**: some commands as gdb and ocount require access to host devices which are usually denied by default. This can be circumveted by granting privileged access to the container (see --privileged flag in above example), or allowing access to specfic devices. See [Runtime privilege and Linux capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) section at Docker Engine Reference for further details.
