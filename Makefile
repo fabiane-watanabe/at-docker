@@ -98,7 +98,7 @@ endif
 
 DOCKER_FILE := $(shell mktemp)
 
-.PHONY: all clean
+.PHONY: all clean test
 
 all:
 	@echo Build docker image with $(IMAGE_TAG) tag
@@ -121,3 +121,7 @@ all:
 clean:
 	@echo Remove docker image tagged $(IMAGE_TAG)
 	$(CONTAINER_TOOL) rmi $(IMAGE_TAG)
+
+test:  
+	$(shell pwd)/tests/run_test.sh $(AT_VERSION) $(DISTRO_NAME) $(DISTRO_NICK) $(IMAGE_TAG) $(CONTAINER_TOOL) $(shell pwd)/tests
+        

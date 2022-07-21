@@ -46,3 +46,9 @@ You can use **docker run** to create a container from AT images. For example, fo
 docker run -it --privileged at/13.0:ubuntu_devel_ppc64le
 ```
 **Important**: some commands as gdb and ocount require access to host devices which are usually denied by default. This can be circumveted by granting privileged access to the container (see --privileged flag in above example), or allowing access to specfic devices. See [Runtime privilege and Linux capabilities](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) section at Docker Engine Reference for further details.
+
+# Test
+Some tests can be executed into AT container in order to check if AT libraries are being linked correctly. You can use the command bellow combined with the same parameters described in **Build**. 
+```
+$ make test
+```
