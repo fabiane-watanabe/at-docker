@@ -123,5 +123,5 @@ clean:
 	$(CONTAINER_TOOL) rmi $(IMAGE_TAG)
 
 test:  
-	$(shell pwd)/tests/run_test.sh $(AT_VERSION) $(DISTRO_NAME) $(DISTRO_NICK) $(IMAGE_TAG) $(CONTAINER_TOOL) $(shell pwd)/tests
+	$(shell pwd)/tests/run_test.sh $(AT_VERSION)$(MINOR)$(EXTRA) $(DISTRO_NAME) $(DISTRO_NICK) $(IMAGE_TAG) $(CONTAINER_TOOL) $(shell pwd)/tests
         

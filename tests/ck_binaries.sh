@@ -20,8 +20,14 @@
 # Install package and check if it was correctly installed
 install_package(){
 	echo "Installing ${1^}." 
-	apt update
-	apt install --assume-yes=TRUE $1   
+	if [[ ${3} == "debian" || ${3} == "ubuntu" ]];then
+		apt update
+		apt install --assume-yes=TRUE $1
+	else
+		echo "DISTRO NOT SUPPORTED FOR THESE TESTS. ABORTING."
+		exit
+	fi
+
 	local=`which $2`
 	if [ -z $local ];then
 		echo "ERROR INSTALLING {$1^^}. ABORTING TEST."
@@ -81,7 +87,7 @@ check_bin_dependencies(){
 	at_folder="/opt/at$1"
 
 	if [[ ! -d ${at_folder} ]]; then
-		echo "ERROR: AT FOLDER NOT FOUND. ABORTING TEST."
+		echo "ERROR: AT FOLDER (${at_folder}) NOT FOUND. ABORTING TEST."
 		exit
 	fi
 
@@ -127,9 +133,15 @@ install_neo4j()
 			 apt-key add -    
 		echo 'deb https://debian.neo4j.com stable 4.4' |\
 			tee -a /etc/apt/sources.list.d/neo4j.list
+	
+		apt-get update
+	
+	else
+		echo "DISTRO NOT SUPPORTED FOR THESE TESTS. ABORTING."
+		exit
 	fi
-	apt-get update
-	install_package 'neo4j' 'neo4j'   
+
+	install_package 'neo4j' 'neo4j' ${1} 
 	return $? 
 }
 
@@ -187,7 +199,7 @@ start_neo4j
 check_neo4j
 
 # Testing AT by redis database
-install_package 'redis' 'redis-server'
+install_package 'redis' 'redis-server' ${at_distro}
 start_redis
 check_bin_dependencies $at_version 'redis-server' 
 check_redisdb
