@@ -47,13 +47,13 @@ endif
 # lsb_release must be installed
 LSB_TOOL := $(shell command -v lsb_release)
 ifeq ($(LSB_TOOL),)
-    $(error Unable to find lsb_release command at PATH)
+    LSB_TOOL := $(shell pwd)/utilities/lsb_release
 endif
 
 CONFIG_ROOT := $(shell pwd)/configs
 
 ifndef AT_VERSION
-    AT_VERSION := $(shell basename -s .conf $$(ls $(CONFIG_ROOT)/[1-9]*.conf | sort -h | tail -1))
+    AT_VERSION := $(shell ls $(CONFIG_ROOT) | grep -e [1-9]\.[0-9] | sort -h | tail -1)
     ifeq ($(AT_VERSION),)
         $(error Couldn't infer AT_VERSION variable, and no hint was given... Bailing out!)
     else
@@ -61,13 +61,21 @@ ifndef AT_VERSION
     endif
 endif
 
-CONFIG := $(CONFIG_ROOT)/$(AT_VERSION).conf
+
 HOST_ARCH := $(shell uname -m)
 ifndef DISTRO_NAME
     DISTRO_NAME := $(shell $(LSB_TOOL) -i -s | tr [:upper:] [:lower:])
+    ifeq ($(findstring redhat, $(DISTRO_NAME)), redhat)
+        DISTRO_NAME := redhat
+    endif
 endif
+
 ifndef DISTRO_NICK
-    DISTRO_NICK := $(shell $(LSB_TOOL) -c -s | tr [:upper:] [:lower:])
+    ifneq (,$(filter debian ubuntu,$(DISTRO_NAME)))
+        DISTRO_NICK := $(shell $(LSB_TOOL) -c -s | tr [:upper:] [:lower:])
+    else
+        DISTRO_NICK := $(shell $(LSB_TOOL) -r -s | cut -d '.' -f1)
+    endif
 endif
 
 ifneq "$(HOST_ARCH)" "ppc64le"
@@ -76,6 +84,11 @@ ifneq "$(HOST_ARCH)" "ppc64le"
     else
         HOST_ARCH := amd64
     endif
+endif
+
+CONFIG := $(CONFIG_ROOT)/$(AT_VERSION)/$(DISTRO_NAME).conf
+ifeq ("$(wildcard $(CONFIG))","")
+    $(error AT VERSION/DISTRO not supported.)
 endif
 
 ifndef IMAGE_PROFILE
@@ -102,12 +115,14 @@ DOCKER_FILE := $(shell mktemp)
 
 all:
 	@echo Build docker image with $(IMAGE_TAG) tag
-	@cp dockerfile.template $(DOCKER_FILE)
+	@cp dockerfile-$(DISTRO_NAME).template $(DOCKER_FILE)
 	@source $(CONFIG) ; \
 	sed -i "s@__BASE_PACKAGES__@$${BASE_PACKAGES}@g" $(DOCKER_FILE) ; \
 	AT_PACKAGES="$${AT_RUNTIME_PACKAGES}" ; \
 	[[ "$(IMAGE_PROFILE)" == "devel" ]] && AT_PACKAGES="$${AT_PACKAGES} $${AT_DEVEL_PACKAGES}" ; \
-	sed -i "s@__AT_PACKAGES__@$$(echo " $${AT_PACKAGES}" | sed "s/  */ advance-toolchain-at\$${AT_VERSION}\$${EXTRA}-/g")@g" $(DOCKER_FILE)
+	sed -i "s@__AT_PACKAGES__@$$(echo " $${AT_PACKAGES}" | sed "s/  */ advance-toolchain-at\$${AT_VERSION}\$${EXTRA}-/g")@g" $(DOCKER_FILE); \
+ 	sed -i "s@__BASE_IMAGE__@$${BASE_IMAGE}@g" $(DOCKER_FILE); \
+    	sed -i "s@__GPG_KEY__@$${GPG_KEY}@g" $(DOCKER_FILE)
 	$(CONTAINER_TOOL) build --build-arg ARCH=$(HOST_ARCH) \
                              --build-arg AT_VERSION=$(AT_VERSION) \
                              --build-arg DISTRO_NAME=$(DISTRO_NAME) \

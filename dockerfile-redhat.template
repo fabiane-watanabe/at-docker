@@ -1,0 +1,53 @@
+# Copyright 2022 IBM Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+ARG ARCH
+ARG DISTRO_NAME
+ARG DISTRO_NICK
+
+FROM __BASE_IMAGE__
+
+ARG AT_VERSION
+ARG DISTRO_NAME
+ARG DISTRO_NICK
+ARG EXTRA
+ARG MINOR
+ARG REPO
+
+WORKDIR /root
+
+RUN dnf update \
+    && dnf install -y __BASE_PACKAGES__ \
+    && dnf clean all
+
+RUN curl -s --fail ${REPO}/${DISTRO_NAME}/RHEL${DISTRO_NICK}/__GPG_KEY__ -o __GPG_KEY__\
+	&& rpm --import __GPG_KEY__ \
+	&& echo -e "\
+[at${AT_VERSION}]\n\
+name=Advance Toolchain IBM FTP\n\
+baseurl=${REPO}/${DISTRO_NAME}/RHEL${DISTRO_NICK}\n\
+enabled=1\n\
+gpgcheck=1\n\
+gpgkey=${REPO}/${DISTRO_NAME}RHEL${DISTRO_NICK}/__GPG_KEY__\n"\
+	>  /etc/yum.repos.d/at${AT_VERSION}.repo\
+	&& dnf update\
+	&& dnf install -y __AT_PACKAGES__
+
+RUN rm __GPG_KEY__
+RUN ln -sf /opt/at${AT_VERSION}${MINOR}${EXTRA}/lib64/ld64.so.2 /lib64/ld64.so.2
+RUN ln -sf /opt/at${AT_VERSION}${MINOR}${EXTRA}/sbin/ldconfig /sbin/ldconfig
+
+ENV PATH /opt/at${AT_VERSION}${MINOR}${EXTRA}/bin:$PATH
+
+CMD ["/bin/bash"]
